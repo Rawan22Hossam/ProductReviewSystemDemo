@@ -1,4 +1,7 @@
 
+using Microsoft.EntityFrameworkCore;
+using ProductReviewSystemDemo.Models;
+
 namespace ProductReviewSystemDemo
 {
     public class Program
@@ -8,6 +11,8 @@ namespace ProductReviewSystemDemo
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+            builder.Services.AddDbContext<ProductReviewContext>(options => 
+            options.UseSqlServer(builder.Configuration.GetConnectionString("ProductReviewDemo")));
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
