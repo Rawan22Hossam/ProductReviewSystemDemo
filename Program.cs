@@ -1,6 +1,12 @@
-
 using Microsoft.EntityFrameworkCore;
-using ProductReviewSystemDemo.Models;
+using ProductReviewSystemDemo.Context;
+using Serilog;
+using ProductReviewSystemDemo.GenericRepository;
+using ProductReviewSystemDemo.Services.Interfaces;
+using ProductReviewSystemDemo.Services;
+using ProductReviewSystemDemo.EntityConfiguration;
+using Microsoft.AspNetCore;
+using Microsoft.AspNetCore.Diagnostics;
 
 namespace ProductReviewSystemDemo
 {
@@ -10,17 +16,22 @@ namespace ProductReviewSystemDemo
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-            builder.Services.AddDbContext<ProductReviewContext>(options => 
+            builder.Services.AddScoped<IProductService, ProductService>();
+            builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            builder.Services.AddDbContext<ApplicationContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("ProductReviewDemo")));
-
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            var app = builder.Build();
+            builder.Services.AddAutoMapper(typeof(MapperConfiguration));
 
+            builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
+            var app = builder.Build();
+        
+       
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
@@ -30,12 +41,15 @@ namespace ProductReviewSystemDemo
 
             app.UseHttpsRedirection();
 
-            app.UseAuthorization();
+            //app.UseAuthorization();
+            //app.UseMiddleware<ExceptionHandlerMiddleware>();
 
+            app.UseStatusCodePages();
 
             app.MapControllers();
 
             app.Run();
         }
     }
-}
+     
+    }

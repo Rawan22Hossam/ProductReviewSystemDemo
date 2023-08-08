@@ -1,0 +1,111 @@
+﻿//############################# Appling Authorization #####################################
+            //builder.Services.AddAuthorization(options =>
+            //{
+            //    options.AddPolicy("RequireAdministratorRole",
+            //         policy => policy.RequireRole("Admin"));          //For Admin
+            //    options.AddPolicy("RequireClientRole",
+            //         policy => policy.RequireRole("Client"));         //For Client 
+            //    options.AddPolicy("ForAuthorizedUsers",
+            //         policy => policy.RequireRole("Admin", "Client"));  // For Both
+
+            //});
+============================================================================================
+
+ /*  public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
+    WebHost.CreateDefaultBuilder(args)
+    .ConfigureLogging(logBuilder =>
+    {
+        logBuilder.ClearProviders(); // removes all providers from LoggerFactory
+        logBuilder.AddConsole();
+        logBuilder.AddTraceSource("Information, ActivityTracing"); // Add Trace listener provider
+    })
+    .UseStartup<Startup>();
+*/
+
+============================================================================================
+  //############################# FluentValidation ##########################
+            //builder.Services.AddControllers().AddFluentValidation(fv =>
+            //{
+            //    fv.RegisterValidatorsFromAssemblyContaining();
+            //});
+            //#################################### Logging #########################################
+            //ILoggerFactory loggerFactory = new LoggerFactory(
+            //                            new[] { new ConsoleLoggerProvider((_, __) => true, true) }
+            //                        );
+            //or
+            //ILoggerFactory loggerFactory = new LoggerFactory().AddConsole();
+
+            // ILogger logger = IloggerFactory.CreateLogger<Program>();
+            // logger.LogInformation("This is log message.");
+            
+========================================================================================================
+ public async Task<User> Login(User userId)
+        {
+            var result = await _genericRepository.GetById(userId);
+            if (userId == null)
+                throw new HttpResponseException(HttpStatusCode.NotFound);
+            return result;
+        }
+ public async Task Login(LoginResource resource, CancellationToken cancellationToken)
+        {
+            var user = await _genericRepository
+                .FirstOrDefaultAsync(x => x.Username == resource.Username, cancellationToken);
+
+            if (user == null)
+                throw new Exception("Username or password did not match.");
+
+            var passwordHash = PasswordHasher.ComputeHash(resource.Password, user.PasswordSalt, _pepper, _iteration);
+            if (user.PasswordHash != passwordHash)
+                throw new Exception("Username or password did not match.");
+
+            return new UserResource(user.Id, user.Username, user.Email);
+        }
+        ==========================================================================
+        [HttpPost("Login")]
+        public async Task<User> Login(int userId)
+        {
+            _loggerFactory.LogInformation("LoginApi");
+            return await _genericRepository.GetById(userId);
+        }
+        ========================================================================
+         [HttpPost("Login")]
+        public async Task Login(LoginDTO loginDto)
+        {
+            LoginDTO loginDto = _genericRepository.GetById()
+
+            byte[] passwordHash = GetPasswordHash(userForLogin.Password, userForConfirmation.PasswordSalt);
+
+            // if (passwordHash == userForConfirmation.PasswordHash) // Won't work
+
+            for (int index = 0; index < passwordHash.Length; index++)
+            {
+                if (passwordHash[index] != userForConfirmation.PasswordHash[index])
+                {
+                    return StatusCode(401, "Incorrect password!");
+                }
+            }
+=====================================================================
+ public async Task <BaseError<string>> Login(LoginDTO user) 
+         {
+            if (user==null|| string.IsNullOrEmpty(user.UserName) || string.IsNullOrEmpty(user.Password))
+                return  new BaseError<string>() { ErrorCode=2,ErrorMessage="InvalidUserNameOrPassword"};
+
+                var userdb = _genericRepository.Get(a => a.UserName == user.UserName && a.PasswordHash == user.Password);
+                if (userdb == null)
+                    return new BaseError<string>() { ErrorCode = 2, ErrorMessage = "InvalidUserNameOrPassword" };
+                else
+                    return new BaseError<string>() { ErrorCode = 0, ErrorMessage = "Success",Data="token" }; ;
+            
+            
+         }
+========================================================================
+ [HttpPost("Login")]
+        public async Task<IActionResult> Login(UserDTO user)
+        {
+            var res = await _userService.Login(user);
+            if(res.BaseError<string>.Errors.Success = 0)
+               return Ok(res);
+            else
+                return BadRequest(res = BaseError<string>.Errors.Error);
+            
+        }

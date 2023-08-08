@@ -2,10 +2,16 @@
 {
     public class User
     {
-
-        public string UserName { get; set; }
         public int UserId { get; set; }
-        public List<Product> Product { get; set; } = new List<Product>();
-        public List<Review> Review { get; set; } = new List<Review>();
+        public string UserName { get; set; }
+        public string PasswordHash { get; set; }
+        public int RoleId { get; set; }
+        public int ProductId { get; set; }
+        public int ReviewId { get; set; }
+        public Roles Role { get; set; }
+        public ICollection<Review> Reviews { get; set; }
+
+        // public ICollection<Product> Product { get; set; }
+        // 
     }
 }

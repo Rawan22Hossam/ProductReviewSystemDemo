@@ -1,62 +1,81 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
+using ProductReviewSystemDemo.DTO;
 using ProductReviewSystemDemo.Models;
-using ProductReviewSystemDemo.Services;
+    using ProductReviewSystemDemo.Services.Interfaces;
+
 namespace ProductReviewSystemDemo.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class UserController : ControllerBase
     {
-        //private readonly IUserService _userService;
-        private readonly ProductReviewContext _dbcontext;
-        public UserController(ProductReviewContext dbcontext)
+       
+        private readonly IUserService _userService;
+      
+        public UserController(IUserService userService)
         {
-            _dbcontext = dbcontext;
+            _userService = userService;
         }
 
-        /*public UserController(IUserService userService)
-       {
-           _userService = userService;
-       }
-*/
-        [HttpGet("Registeration")]
-        public async Task<User> Registeration(User user)
+        [HttpPost("Register")]
+        public async Task<ActionResult<BaseError<string>>> Register(UserDTO user)
         {
-            return await _dbcontext.Registeration(user);
+            var res = await _userService.Register(user);
+            if (res.ErrorCode == (int)ErrorsEnum.Success)
+            {
+                return Ok(res);
+            }
+            return BadRequest(res);
+            
         }
+
         [HttpPost("Login")]
-        public async Task<User> Login(User user)
+        public async Task<ActionResult<BaseError<string>>> Login(UserDTO user)
         {
-            //if (user == null) 
-            //    return NotFound(); 
-            return await _dbcontext.Login(user);
+            var res = await _userService.Login(user);
+            if(res.ErrorCode==(int)ErrorsEnum.Success)
+            {
+                return Ok(res);
+            }
+            return BadRequest(res);
         }
-        [HttpGet("ProductCategory")]
-        public async Task<Product> ViewCategory(string ProductCategory)
+
+        [HttpGet("GetAllUsers")]
+        public async Task<ActionResult<User>> GetAllUsersAsync()
         {
-            return await _dbcontext.ViewCategory(ProductCategory);
+            var result =  _userService.GetAllUsersAsync();
+            if(result == null)
+                return BadRequest();
+            return Ok(result);
         }
-        [HttpGet("View Product")]
-        public async Task<Product> ViewProduct(Product product)
+
+        [HttpGet("GetUserById")]
+        public async Task<ActionResult<User>> GetUserById(int UserId)
         {
-            return await _dbcontext.ViewProduct(product);
+            var result = _userService.GetUserById(UserId);
+            if (result == null)
+                return BadRequest();
+            return Ok(result);
         }
-        [HttpGet("Rating")]
-        public async Task<Review> Rating(int UserId)
+
+        [HttpPut("UpdateUser")]
+        public async Task<ActionResult> UpdateUser(User UserId)
         {
-            return await _dbcontext.Rating(UserId);
+            var result = _userService.UpdateUser(UserId);
+            if (result == null)
+                return BadRequest();
+            return Ok();
         }
-        [HttpGet("Feedback")]
-        public async Task<Review> Feedback(string Comments)
+
+        [HttpDelete("DeleteUser")]
+        public async Task<ActionResult> DeleteUser(User UserId)
         {
-            return await _dbcontext.Feedback(Comments);
-        }
-        [HttpPut("Update Details")]
-        public async Task<User> UpdateDetails(User user)
-        {
-            return await _dbcontext.UpdateDetails(user);
-        }
+            var result = _userService.DeleteUser(UserId);
+            if (result == null)
+                return BadRequest();
+            return Ok(result);
+        }  
     }
+
 }
+
