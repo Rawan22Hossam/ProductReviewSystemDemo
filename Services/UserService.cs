@@ -8,6 +8,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using IdentityServer4.Models;
 using Microsoft.AspNetCore.DataProtection;
+using ProductReviewSystemDemo.UnitOfWork;
 
 namespace ProductReviewSystemDemo.Services
 {
@@ -22,15 +23,19 @@ namespace ProductReviewSystemDemo.Services
             _userRepository = userRepository;
             _configuration = configuration;
             _mapper = mapper;
+           
         }
         public async Task<BaseError<string>> Register(UserDTO user)
         { 
             // map userdto to new entity of user with auto mapper
             var AllUsers = _mapper.Map<User>(user);
-            var userdb = _userRepository.GetAll(a => a.Role).FirstOrDefault(a => a.UserName == user.UserName && a.PasswordHash == user.Password);
+            var userdb = _userRepository.GetAll(a => a.Role).FirstOrDefault(a => a.UserName == user.UserName);
             if (userdb != null)
                 return new BaseError<string>() { ErrorCode = (int)ErrorsEnum.UserAllReadyRegistered, ErrorMessage = ErrorsEnum.UserAllReadyRegistered.ToString() };
+           
+            AllUsers.PasswordHash= HelperClass.CreatePasswordHash(user.Password);
             var userAdd = _userRepository.Add(AllUsers);
+            _userRepository.SaveChanges();
             return new BaseError<string>() { ErrorCode = (int)ErrorsEnum.Success, ErrorMessage = ErrorsEnum.Success.ToString() };
 
         }
@@ -39,7 +44,7 @@ namespace ProductReviewSystemDemo.Services
             var passwordhash = HelperClass.CreatePasswordHash(user.Password);
             var userdb = _userRepository.GetAll(a => a.Role).FirstOrDefault(a => a.UserName == user.UserName && a.PasswordHash == passwordhash);
             if (userdb == null)
-                return new BaseError<string>() { ErrorCode = (int)ErrorsEnum.Success ,ErrorMessage = ErrorsEnum.Success.ToString() };
+                return new BaseError<string>() { ErrorCode = (int)ErrorsEnum.InvalidUsernameOrPassword,ErrorMessage = ErrorsEnum.InvalidUsernameOrPassword.ToString() };
             var secret = _configuration.GetSection("Token:secretKey").Value;
 
             var token = HelperClass.CreateToken(userdb, secret);

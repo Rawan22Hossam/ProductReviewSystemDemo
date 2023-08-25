@@ -1,11 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using ProductReviewSystemDemo.GlobalExceptionHandler;
 using ProductReviewSystemDemo.Models;
 using ProductReviewSystemDemo.Services.Interfaces;
+using Serilog;
 
 namespace ProductReviewSystemDemo.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Admin")]
     public class ProductController : ControllerBase
     {
         private readonly IProductService _productService;
@@ -15,16 +19,20 @@ namespace ProductReviewSystemDemo.Controllers
         }
 
         [HttpGet("GetProductAll")]
-        public async Task<ActionResult<Product>> GetAllProductsAsync()
+        [Authorize]
+        public async Task<ActionResult> GetAllProductsAsync()
         {
-            var result = _productService.GetAllProductsAsync();
-            if (result == null)
-                return BadRequest();
-            return Ok(result);
+           
+                var result = _productService.GetAllProductsAsync();
+                if (result == null)
+                    return BadRequest();
+                Log.Information("All Users => {@result}", result);
+                return Ok(result);
         }
 
         [HttpGet("GetProductById")]
-        public async Task<ActionResult<Product>> GetProductById(int ProductId)
+        
+        public async Task<ActionResult> GetProductById(int ProductId)
         {
             var result = _productService.GetProductById(ProductId);
             if (result == null)
@@ -38,7 +46,7 @@ namespace ProductReviewSystemDemo.Controllers
             var result = _productService.AddProductAsync(product);
             if (result == null)
                 return BadRequest();
-            return Ok();
+            return Ok(result);
         }
 
         [HttpPut("UpdateProduct")]
@@ -47,11 +55,11 @@ namespace ProductReviewSystemDemo.Controllers
             var result = _productService.UpdateProductAsync(ProductId);
             if (result == null)
                 return BadRequest();
-            return Ok();
+            return Ok(result);
         }
 
         [HttpDelete("DeleteProduct")]
-        public async Task <ActionResult> DeleteProductAsync(int ProductId)
+        public async Task<ActionResult> DeleteProductAsync(int ProductId)
         {
             var result = _productService.DeleteProductAsync(ProductId);
             if (result == null)

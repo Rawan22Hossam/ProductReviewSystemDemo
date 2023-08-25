@@ -7,7 +7,7 @@ namespace ProductReviewSystemDemo.Models
         public string AdminName { get; set; }
         public string Password { get; set; }
         public Roles Role { get; set; }
-        public int RoleId { get; set; } = 3;
+        public int RoleId { get; set; }
 
     }
 }

@@ -117,7 +117,11 @@ namespace ProductReviewSystemDemo.GenericRepository
                 entry.State = EntityState.Detached;
             }
         }
-  
+        public void SaveChanges()
+        {
+            _dbContext.SaveChanges();
+        }
+
 
     }
 }

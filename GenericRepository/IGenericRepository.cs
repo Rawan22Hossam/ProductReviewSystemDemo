@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using ProductReviewSystemDemo.DTO;
 using ProductReviewSystemDemo.Models;
 using System.Linq.Expressions;
 
@@ -24,7 +25,9 @@ namespace ProductReviewSystemDemo.GenericRepository
         Task RemoveRange(IEnumerable<T> list);
         Task UpdateRange(IEnumerable<T> list);
         void DetachAllEntities();
-       
+        void SaveChanges();
+      //  Task Add(ReviewDTO reviewDTO);
+
         //void Insert(Product product);
     }
 }

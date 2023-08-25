@@ -6,7 +6,7 @@
         public string ClientName { get; set; }
         public string ClientPassword { get; set; }
         public Roles Role { get; set; }
-        public int RoleId { get; set; } = 2;
+        public int RoleId { get; set; }
 
     }
 }

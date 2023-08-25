@@ -10,7 +10,8 @@ namespace ProductReviewSystemDemo.EntityConfiguration
         public MapperConfiguration() 
         {
             CreateMap<Product, ProductDto>().ReverseMap();
-            CreateMap<User, UserDTO>().ReverseMap();  
+            CreateMap<User, UserDTO>().ReverseMap();
+            CreateMap<Review , ReviewDTO>().ReverseMap();
         }
         
     }

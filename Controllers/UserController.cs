@@ -1,12 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ProductReviewSystemDemo.DTO;
 using ProductReviewSystemDemo.Models;
-    using ProductReviewSystemDemo.Services.Interfaces;
+using ProductReviewSystemDemo.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Serilog;
 
 namespace ProductReviewSystemDemo.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    
     public class UserController : ControllerBase
     {
        
@@ -18,6 +21,7 @@ namespace ProductReviewSystemDemo.Controllers
         }
 
         [HttpPost("Register")]
+        
         public async Task<ActionResult<BaseError<string>>> Register(UserDTO user)
         {
             var res = await _userService.Register(user);
@@ -30,7 +34,7 @@ namespace ProductReviewSystemDemo.Controllers
         }
 
         [HttpPost("Login")]
-        public async Task<ActionResult<BaseError<string>>> Login(UserDTO user)
+        public async Task<ActionResult> Login(UserDTO user)
         {
             var res = await _userService.Login(user);
             if(res.ErrorCode==(int)ErrorsEnum.Success)
@@ -39,18 +43,24 @@ namespace ProductReviewSystemDemo.Controllers
             }
             return BadRequest(res);
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpGet("GetAllUsers")]
-        public async Task<ActionResult<User>> GetAllUsersAsync()
+        public async Task<ActionResult> GetAllUsersAsync()
         {
-            var result =  _userService.GetAllUsersAsync();
-            if(result == null)
-                return BadRequest();
-            return Ok(result);
+            if (User.IsInRole("Admin"))
+            {
+                var result = _userService.GetAllUsersAsync();
+                if (result == null)
+                    return BadRequest();
+                Log.Information("All Users => {@result}");
+                return Ok(result);
+            }
+            else 
+                return Unauthorized();
         }
 
         [HttpGet("GetUserById")]
-        public async Task<ActionResult<User>> GetUserById(int UserId)
+        public async Task<ActionResult> GetUserById(int UserId)
         {
             var result = _userService.GetUserById(UserId);
             if (result == null)
